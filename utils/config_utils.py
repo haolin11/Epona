@@ -6,6 +6,7 @@ import difflib
 import os
 import os.path as osp
 import platform
+import re
 import shutil
 import sys
 import tempfile
@@ -29,6 +30,11 @@ RESERVED_KEYS = ['filename', 'text', 'pretty_text', 'env_variables']
 
 def digit_version(version_str):
     return tuple(map(int, version_str.split('.')))
+
+def check_file_exist(filename):
+    """Check if file exists, raise FileNotFoundError if not."""
+    if not osp.exists(filename):
+        raise FileNotFoundError(f'Config file {filename} does not exist.')
 
 class LazyAttr:
     """The attribute of the LazyObject.
@@ -419,6 +425,37 @@ class ImportTransformer(ast.NodeTransformer):
                 f'{alias.asname} = LazyObject('
                 f'"{alias.name}",'
                 f'location="{self.filename}, line {node.lineno}")').body[0]
+        return node
+
+class RemoveAssignFromAST(ast.NodeTransformer):
+    """Remove assignment statements for a specific variable name from AST.
+    
+    This is used to remove assignments to reserved keys like '_base_' 
+    from config files, as these are handled separately.
+    """
+    def __init__(self, var_name: str):
+        self.var_name = var_name
+        super().__init__()
+    
+    def visit_Assign(self, node):
+        """Remove assignments where the target is the specified variable."""
+        # Check if any target matches the variable name
+        new_targets = []
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id == self.var_name:
+                # Skip this assignment
+                continue
+            new_targets.append(target)
+        
+        if not new_targets:
+            # All targets were removed, return None to remove the node
+            return None
+        
+        if len(new_targets) < len(node.targets):
+            # Some targets were removed, create new assignment
+            node.targets = new_targets
+            return node
+        
         return node
 
 class LazyObject:

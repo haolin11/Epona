@@ -9,8 +9,13 @@ def count_parameters(model):
     return total_params
 
 def format_number(num, use_unit=True):
-    locale.setlocale(locale.LC_ALL, '')  # 设置为本地数字格式
-    formatted_num = locale.format_string("%d", num, grouping=True)
+    try:
+        locale.setlocale(locale.LC_ALL, '')  # 设置为本地数字格式
+        formatted_num = locale.format_string("%d", num, grouping=True)
+    except (locale.Error, ValueError):
+        # 如果 locale 设置失败，使用简单的格式化
+        formatted_num = f"{num:,}"
+    
     if use_unit:
         if num >= 1e9:
             return f"{num / 1e9:.2f}B ({formatted_num})"

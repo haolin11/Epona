@@ -33,3 +33,5 @@ save_video/*
 semantic_images
 
 semantic_images/*
+**/*.pkl
+./nuplan_meta/*
