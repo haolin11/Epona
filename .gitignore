@@ -37,4 +37,5 @@ semantic_images/*
 nuplan_meta/*
 pretrained/*
 test_videos/*
+exp/*
 *.mp4

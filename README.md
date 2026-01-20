@@ -130,6 +130,10 @@ scripts/train_deepspeed.py \
   --resume_path "pretrained/epona_nuplan.pkl" \ # set `resume_path` to resume training on previous checkpoint
   --eval_steps 2000
 ```
+```bash
+PYTHONPATH=/home/dataset-local/Epona:$PYTHONPATH torchrun --nnodes=1 --nproc_per_node=8 scripts/train_deepspeed.py   --batch_size 1   --lr 2e-5   --exp_name "train-nuplan-test"   --config configs/dit_config_dcae_nuplan.py   --resume_path "pretrained/epona_nuplan.pkl"   --eval_steps 500
+```
+
 You can customize the configuration file in the `configs` folder (e.g., adjust image resolution, number of condition frames, model size, etc.).
 Additionally, you can finetune our base world model on your own dataset by modifying the `dataset` folder to implement a custom dataset class.
 
