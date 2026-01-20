@@ -34,4 +34,7 @@ semantic_images
 
 semantic_images/*
 **/*.pkl
-./nuplan_meta/*
+nuplan_meta/*
+pretrained/*
+test_videos/*
+*.mp4

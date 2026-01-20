@@ -66,6 +66,7 @@
 conda create -n epona python=3.10
 conda activate epona
 pip install -r requirements.txt
+pip install imageio[ffmpeg]
 ```
 To run the code with CUDA properly, you can comment out `torch` and `torchvision` in `requirement.txt`, and install the appropriate version of `torch>=2.1.0+cu121` and `torchvision>=0.16.0+cu121` according to the instructions on [PyTorch](https://pytorch.org/get-started/locally/).
 

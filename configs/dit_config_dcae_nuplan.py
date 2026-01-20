@@ -7,8 +7,8 @@ datasets_paths=dict(
     nuscense_train_json_path='',
     nuscense_val_json_path='',
     
-    nuplan_root= '',
-    nuplan_json_root= '',
+    nuplan_root= '/home/dataset-local/datasets/nuplan-v1.1',
+    nuplan_json_root= '/home/dataset-local/Epona_data/test_meta_data_nuplan',
 )
 train_data_list=['nuplan']
 val_data_list=['nuplan']
@@ -25,7 +25,7 @@ vae_embed_dim=32
 downsample_size=32
 patch_size=1
 vae='DCAE_f32c32'
-vae_ckpt='/home/dataset-local/home/chl/Epona_data/dcae_td_20000.pkl' #! VAE checkpoint path
+vae_ckpt='/home/dataset-local/Epona_data/dcae_td_20000.pkl' #! VAE checkpoint path
 add_encoder_temporal=False
 add_decoder_temporal=True
 temporal_patch_size=6
