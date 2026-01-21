@@ -99,6 +99,18 @@ class MixedBatchSampler(BatchSampler):
             self.raw_batches_split.append(list(batch[self.rank:self.dataset_length[i]:self.num_replicas]))
 
         self.n_batches = [len(b) for b in self.raw_batches_split]
+        
+        # 确保所有rank的batch数量一致，避免分布式训练时某些GPU提前结束导致死锁
+        # 计算所有rank中最小的batch数量，然后截断到这个数量
+        min_batches_per_dataset = []
+        for i in range(len(self.raw_batches)):
+            total_batches_in_dataset = len(self.raw_batches[i])
+            min_batches = total_batches_in_dataset // self.num_replicas  # 向下取整，确保所有rank都有这么多
+            min_batches_per_dataset.append(min_batches)
+            # 截断当前rank的batch列表
+            self.raw_batches_split[i] = self.raw_batches_split[i][:min_batches]
+        
+        self.n_batches = [len(b) for b in self.raw_batches_split]
         self.n_total_batch = sum(self.n_batches)
         # end dist
 
@@ -123,7 +135,11 @@ class MixedBatchSampler(BatchSampler):
             # if batch list is empty, generate new list
             if 0 == len(self.raw_batches_split[idx_ds]):
                 # self.raw_batches[idx_ds] = list(self.src_batch_samplers[idx_ds])
-                self.raw_batches_split[idx_ds] = list(self.raw_batches[idx_ds][self.rank:self.dataset_length[idx_ds]:self.num_replicas])
+                rank_batches = list(self.raw_batches[idx_ds][self.rank:self.dataset_length[idx_ds]:self.num_replicas])
+                # 截断到所有rank都能获得的数量，确保分布式训练同步
+                total_batches = len(self.raw_batches[idx_ds])
+                min_batches = total_batches // self.num_replicas
+                self.raw_batches_split[idx_ds] = rank_batches[:min_batches]
             # get a batch from list
             batch_raw = self.raw_batches_split[idx_ds].pop()
             # shift by cumulative dataset length
