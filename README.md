@@ -107,6 +107,13 @@ python3 scripts/test/test_nuplan.py \
   --resume_path "pretrained/epona_nuplan.pkl" \
   --config configs/dit_config_dcae_nuplan.py
 ```
+```bash
+python3 scripts/test/test_free.py  --exp_name "test-nuplan-finetune"   --start_id 0 --end_id 1  --resume_path "exp/ckpt/train-nuplan-test/tvar_28000.pkl"   --config configs/dit_config_dcae_nuplan.py
+```
+visualize trajectory
+```bash
+python3 scripts/visualize_trajectory.py --traj_path test_videos/test-nuplan-finetune300/sliding_0/pred_traj.pt --arrow_interval 30
+```
 where:
 - `exp_name` is the name of the experiment;
 - `start_id` and `end_id` are the range of the test samples;

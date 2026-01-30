@@ -11,7 +11,7 @@ from einops import rearrange
 from torch.utils.data import DataLoader, Subset
 
 root_path = os.path.abspath(__file__)
-root_path = '/'.join(root_path.split('/')[:-2])
+root_path = '/'.join(root_path.split('/')[:-3])
 print(root_path)
 sys.path.append(root_path)
 
@@ -136,7 +136,7 @@ def test_sliding_window_img(val_data, model, args, tokenizer):
 def main(args):
     local_rank = 0
     model = TrainTransformersDiT(args, load_path=args.resume_path, local_rank=local_rank, condition_frames=args.condition_frames)    
-    test_dataset = NuPlan('nuplan-v1.1', 'nuplan_meta', split='test', condition_frames=args.condition_frames+args.traj_len, downsample_fps=args.downsample_fps, h=args.image_size[0], w=args.image_size[1])
+    test_dataset = NuPlan(args.datasets_paths['nuplan_root'], args.datasets_paths['nuplan_json_root'], split='test', condition_frames=args.condition_frames+args.traj_len, downsample_fps=args.downsample_fps, h=args.image_size[0], w=args.image_size[1])
     start_id, end_id = args.start_id, min(args.end_id, len(test_dataset))
     test_dataset = Subset(test_dataset, list(range(start_id, end_id)))
     
