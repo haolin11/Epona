@@ -94,11 +94,11 @@ class UAVDataset(Dataset):
             self.pose_meta_path = f'{json_root}/ego_meta'
         elif split == 'test':
             self.meta_path = f'{json_root}/test_meta.json'
-            self.pose_meta_path = f'{json_root}/ego_meta'
+            self.pose_meta_path = f'{json_root}/test_ego_meta'
         else:
             # Default to test for val split
             self.meta_path = f'{json_root}/test_meta.json'
-            self.pose_meta_path = f'{json_root}/ego_meta'
+            self.pose_meta_path = f'{json_root}/test_ego_meta'
 
         self.condition_frames = condition_frames
         self.block_size = block_size
