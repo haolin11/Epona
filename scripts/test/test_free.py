@@ -132,11 +132,34 @@ def test_sliding_window_img(val_data, model, args, tokenizer):
             predict_trajs = torch.cat(predict_trajs)
             print("traj shape:", predict_trajs.shape)
             torch.save(predict_trajs, os.path.join(video_save_path, 'pred_traj.pt'))
+            
+            # Save GT trajectory for comparison
+            # Use pose_total and yaw_total from get_rel_pose (same as used in training)
+            # pose_total shape: [B, T, 2], yaw_total shape: [B, T, 1]
+            # Skip first condition_frames+1 (they are used as input conditions)
+            gt_start = condition_frames + 1
+            gt_end = min(gt_start + args.test_video_frames, pose_total.shape[1])
+            
+            gt_poses = pose_total[0, gt_start:gt_end, :].cpu()  # [N, 2]
+            gt_yaws = yaw_total[0, gt_start:gt_end, :].cpu()    # [N, 1]
+            gt_traj = torch.cat([gt_poses, gt_yaws], dim=-1)    # [N, 3]
+            
+            # Debug: print some GT values
+            print(f"pose_total shape: {pose_total.shape}, yaw_total shape: {yaw_total.shape}")
+            print(f"GT traj shape: {gt_traj.shape} (frames {gt_start} to {gt_end})")
+            print(f"GT first 5 poses (x, y):\n{gt_poses[:5]}")
+            print(f"GT first 5 yaws:\n{gt_yaws[:5]}")
+            print(f"Pred first 5 trajs:\n{predict_trajs[:5, :]}")
+            
+            torch.save(gt_traj, os.path.join(video_save_path, 'gt_traj.pt'))
                 
 def main(args):
     local_rank = 0
     model = TrainTransformersDiT(args, load_path=args.resume_path, local_rank=local_rank, condition_frames=args.condition_frames)    
-    test_dataset = NuPlan(args.datasets_paths['nuplan_root'], args.datasets_paths['nuplan_json_root'], split='test', condition_frames=args.condition_frames+args.traj_len, downsample_fps=args.downsample_fps, h=args.image_size[0], w=args.image_size[1])
+    # Load enough frames for both model input and GT trajectory comparison
+    # Need: condition_frames + test_video_frames + 1 (for relative pose calculation)
+    total_frames_needed = args.condition_frames + args.test_video_frames + 1
+    test_dataset = NuPlan(args.datasets_paths['nuplan_root'], args.datasets_paths['nuplan_json_root'], split='test', condition_frames=total_frames_needed, downsample_fps=args.downsample_fps, h=args.image_size[0], w=args.image_size[1])
     start_id, end_id = args.start_id, min(args.end_id, len(test_dataset))
     test_dataset = Subset(test_dataset, list(range(start_id, end_id)))
     

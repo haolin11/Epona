@@ -89,7 +89,7 @@ axes_dim_dit_traj = [16, 56, 56]
 return_predict_traj = True
 
 fix_stt = False
-test_video_frames = 50
+test_video_frames = 200
 drop_feature = 0
 no_pose = False
 sample_prob = [1.0]
